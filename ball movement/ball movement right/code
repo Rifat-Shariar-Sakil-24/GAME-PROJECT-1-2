@@ -45,4 +45,5 @@ void ball_movement_right()
 
 
 	ball_x += ball_exact_dx;  // include new ball_dx 
+	
 }
