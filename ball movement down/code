@@ -1,0 +1,38 @@
+
+
+void ball_movement_down()
+{
+
+
+	if (ball_hit_the_boat && ball_radius - ball_y <= eps) // used ball_hit_the_boat condition to avoid ball_dx = 0 when starting the game && then checked  if the ball is right under the boat
+	{
+		angle = boat_bottom_right_x - ball_x - 15.5; // update angle for ball's new direction
+		ball_dx = velocity*cos(PI*angle / 180); // new ball_dx for new angle
+		ball_dy = ball_main_dy; // ball_dy will get its original change of speed as every collison of boat and ball is likely a new start
+		ball_y += ball_dy; // updates the ball_y for for updated ball_dy
+		ball_hit_the_boat = 0; 
+		return;
+	}
+
+
+	ball_hit_the_boat = 0; // the ball isn't right under the boat
+	double destination_Y_axis = ball_y - ball_radius + ball_dy; // checks the final destination covered in Y axis if ball_dx is fully calculated
+
+	double ball_exact_dy_down; // aprropiate amouont of ball_dy 
+  
+	if (destination_Y_axis - bottom_par < eps) //checking if the ball crosses bottom_par or not 
+	{
+		/*ball crosses bottom_par*/
+
+		ball_exact_dy_down = ball_y - ball_radius - bottom_par;
+		ball_exact_dy_down *= (-1); // ball is coming down so appropiate of ball_dy will be negative
+		ball_exact_dy = ball_exact_dy_down; // saving this for left and right movement of ball
+		bottom_par_or_boat_touched = true; // touches bottom
+		ball_dy = abs(ball_dy); // ball will change its direction in Y axis
+	}
+  
+	else ball_exact_dy_down = ball_dy; // takes full ball_dy as the ball doesn't cross bottom_par
+
+	ball_y += ball_exact_dy_down; // updaiting the value of ball_y with appropiate ball_dy
+
+}
