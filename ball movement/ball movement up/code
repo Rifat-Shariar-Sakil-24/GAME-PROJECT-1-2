@@ -25,6 +25,7 @@ void ball_movement_up()
 
 
 	}
+	
 	else ball_exact_dy_up = ball_dy; // no contact between ball and boat. so appropiate  ball_dy  = ball_dy
 
 	ball_y += ball_exact_dy_up; //updating ball_y for drawing the ball
