@@ -35,4 +35,5 @@ void ball_movement_down()
 
 	ball_y += ball_exact_dy_down; // updaiting the value of ball_y with appropiate ball_dy
 	
+	
 }
