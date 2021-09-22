@@ -1,0 +1,32 @@
+
+void ball_movement_up()
+{
+
+	double destination_Y_axis = ball_y + ball_radius + ball_dy; // checks the final destination covered in Y axis if ball_dy is fully calculated 
+	double ball_exact_dy_up;
+
+	if (destination_Y_axis - boat_bottom_y >= eps) // comparing boat_bottom_y and final destination of ball_y if ball_dy is fully taken
+	{
+		bool check = game_over(); // checks if the game is over or not in respect to boat's and ball's position in the X axis
+
+		if (check == 0) // finds that the boat can't redirect the ball 
+		{
+			new_start(); // new round starts
+			return;
+		}
+
+		ball_hit_the_boat = 1; // the ball hit the bottom surface of the boat
+		bottom_par_or_boat_touched = 1; // as teh ball touched the boat, ball_dy might change its original speed, and then ball_dx will also change to maintain the same slope. So this is actually needed for ball's movement in X axis
+
+
+		ball_exact_dy_up = boat_bottom_y - ball_y - ball_radius; // appopita ball_dy 
+		ball_exact_dy = ball_exact_dy_up; // ball_dx might change , so appromiate ball_dy(ball_exact_dy) is saved
+		ball_dy = -ball_dy; // after hitting the boat, ball will change its direction in Y axis. so ball_dy becomes same with opposite sign
+
+
+	}
+	else ball_exact_dy_up = ball_dy; // no contact between ball and boat. so appropiate  ball_dy  = ball_dy
+
+	ball_y += ball_exact_dy_up; //updating ball_y for drawing the ball
+
+}
