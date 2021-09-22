@@ -1,0 +1,48 @@
+void ball_movement_right()
+{
+
+	double destination_x_axis = ball_x + ball_radius + ball_dx;  // checks the final destination covered in X axis if ball_dx is fully calculated
+	double ball_exact_dx; // variable to reduce ball_dx in respect to appropate ball_dy
+
+	if (destination_x_axis -( screenwidth - right_par) > eps)   // checking if the ball crosses right_par or not 
+	{
+		/*ball won't cross right_par*/
+
+		ball_exact_dx = screenwidth - right_par - ball_x - ball_radius; // taking appropiate ball_dx
+		ball_exact_dy = abs((ball_dy*ball_exact_dx) / ball_dx);  // now ball_dy will also be updated because of the update of ball_dx as ball_dx crossed the right_par and we were working with full ball_dy
+
+
+		if (ball_dy > 0)
+		{
+			/*execute the ball_dy of before and include appropiate ball_dy*/
+			if (bottom_par_or_boat_touched) ball_y = ball_y + ball_dy - ball_exact_dy;
+			else ball_y = ball_y - ball_dy + ball_exact_dy;
+		}
+
+		else
+		{
+			/*execute the ball_dy of before and include appropiate ball_dy*/
+			if (bottom_par_or_boat_touched) ball_y = ball_y - abs(ball_dy) + ball_exact_dy;
+			else ball_y = ball_y + abs(ball_dy) - ball_exact_dy;
+		}
+			
+		bottom_par_or_boat_touched = false;   // after this operation ball won't be touched with any of the boat or bottom par
+		ball_dx = -ball_dx; // change the direction in X axis
+	}
+
+	else
+	{
+		
+		if (bottom_par_or_boat_touched) // checks if the boat is touched with the bottom_par or with the boat
+		{
+			ball_exact_dx = abs((ball_dx*ball_exact_dy) / ball_dy); // ball is touched with any of the boat or bottom_par, so appropiate ball dx will also change
+			bottom_par_or_boat_touched = false;  // after this operation ball won't be touched with any of the boat or bottom par
+		}
+
+		else ball_exact_dx = ball_dx;  // take full ball_dx as the ball neither crosses 
+		
+	}
+
+
+	ball_x += ball_exact_dx;  // include new ball_dx 
+}
