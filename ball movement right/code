@@ -14,14 +14,14 @@ void ball_movement_right()
 
 		if (ball_dy > 0)
 		{
-			/*execute the ball_dy of before and include appropiate ball_dy*/
+			/*execlude the ball_dy of before and include the appropiate ball_dy*/
 			if (bottom_par_or_boat_touched) ball_y = ball_y + ball_dy - ball_exact_dy;
 			else ball_y = ball_y - ball_dy + ball_exact_dy;
 		}
 
 		else
 		{
-			/*execute the ball_dy of before and include appropiate ball_dy*/
+			/*execlude the ball_dy of before and include the appropiate ball_dy*/
 			if (bottom_par_or_boat_touched) ball_y = ball_y - abs(ball_dy) + ball_exact_dy;
 			else ball_y = ball_y + abs(ball_dy) - ball_exact_dy;
 		}
