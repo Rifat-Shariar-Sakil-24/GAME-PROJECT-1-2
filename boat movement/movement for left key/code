@@ -1,1 +1,34 @@
 
+
+void left_key_movement()
+{
+	double total = boat_bottom_left_x - boat_keyboard_dx; // left movement of boat in X axis for left movement key(left arrow)
+
+	double ball_move;  // for every click on left movement key, the ball will also move if the ball movement is off. ball_move indicates how much the ball will move in X axis for every left movement key click 
+	
+	if (total >= left_par + 5)  // boat can move freely with the defined movement value for left movement key
+	{
+		boat_image_movement_x -= boat_keyboard_dx;  // boat image moves 
+		boat_bottom_left_x -= boat_keyboard_dx;     // the bottom left corner of the boat moves
+		boat_bottom_right_x -= boat_keyboard_dx;    // the bottom right corner of the boat moves
+		ball_move = boat_keyboard_dx;
+
+	}
+  
+	else    //at some positions of the boat in X axis, it won't move that much what it was supposed to.
+	{
+
+		double exact_boat_movement_X_axis = boat_bottom_left_x - left_par - 5;
+
+		boat_image_movement_x -= exact_boat_movement_X_axis;   // boat image moves some certain amount such that its left side doesn't cross left_par
+		boat_bottom_left_x -= exact_boat_movement_X_axis;      //  boat bottom left corner will also move along with its holding picture
+		boat_bottom_right_x -= exact_boat_movement_X_axis;     //  boat bottom right corner will also move along with its holding picture
+		ball_move = exact_boat_movement_X_axis;
+	}
+
+	if (ball_movement_on == false) ball_x -= ball_move;  // if ball movement is off , ball will also move if the boat moves. Amount of movement will be the same of boat movement
+
+}
+
+
+
