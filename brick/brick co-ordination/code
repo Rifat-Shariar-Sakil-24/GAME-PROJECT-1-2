@@ -1,0 +1,48 @@
+void brick_coordination_set()
+{
+
+	/*first brick's coordination*/
+	double starting_x = left_par; 
+	double starting_y = brick_shuru_y;
+
+	int brick_number = 0;
+
+	for (int i = 0; i<brick_col; i++)
+	{
+		for (int j = 0; j<brick_row; j++)
+		{
+
+			brick[brick_number].brick_x = starting_x;
+			brick[brick_number].brick_y = starting_y;
+
+
+			/*setting up line for bricks*/
+			brick[brick_number].line_bottom_left[0] = starting_x;
+			brick[brick_number].line_bottom_left[1] = starting_y;
+
+			brick[brick_number].line_top_left[0] = starting_x;
+			brick[brick_number].line_top_left[1] = starting_y + brick_height;
+
+
+
+			starting_x += brick_width;
+
+
+			brick[brick_number].line_bottom_right[0] = starting_x;
+			brick[brick_number].line_bottom_right[1] = starting_y;
+
+
+			brick[brick_number].line_top_right[0] = starting_x;
+			brick[brick_number].line_top_right[1] = starting_y + brick_height;
+
+
+
+			brick_number++;
+		}
+
+		starting_x = left_par;
+		starting_y += brick_height;
+
+	}
+
+}
