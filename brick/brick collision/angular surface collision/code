@@ -39,14 +39,14 @@ bool  angular_collision_detection(double brick_x, double brick_y, double brick_n
 
 
 
-		dy = abs(ball_y - Y);
+		ang_dy = abs(ball_y - Y);
 
-		dx = (ball_dx*dy) / ball_dy;
-		dx = abs(dx);
+		ang_dx = (ball_dx*ang_dy) / ball_dy;
+		ang_dx = abs(ang_dx);
 
-		ball_x += (sign_dx*dx);
-		ball_y += (sign_dy*dy);
-		
+		ball_x += (sign_dx*ang_dx);
+		ball_y += (sign_dy*ang_dy);
+
 
 		ball_dx *= (-1);
 		ball_dy *= (-1);
