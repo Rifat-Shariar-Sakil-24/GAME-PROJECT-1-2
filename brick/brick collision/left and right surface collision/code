@@ -1,5 +1,6 @@
 
-bool left_and_right_surface_collison_detection(int brick_number)
+
+bool left_and_right_surface_collision_detection(int brick_number)
 {
 	bool brick_vanish = 0;
 
@@ -21,22 +22,20 @@ bool left_and_right_surface_collison_detection(int brick_number)
 
 		double new_ball_dx;
 
-		if (ball_dx < 0){ new_ball_dx = -(ball_x - ball_radius - brick[i].brick_x - brick_width); }
-		else{
-			new_ball_dx = abs(ball_x + ball_radius - brick[i].brick_x);
+		if (ball_dx < 0){ new_ball_dx = -(ball_x - ball_radius - brick[brick_number].brick_x - brick_width); }
+		else{ new_ball_dx = abs(ball_x + ball_radius - brick[brick_number].brick_x); }
 
-			double new_ball_dy = (ball_dy*new_ball_dx) / ball_dx;
+		double new_ball_dy = (ball_dy*new_ball_dx) / ball_dx;
 
-			if (ball_dx < 0) 	ball_x -= abs(new_ball_dx);
-			else ball_x += abs(new_ball_dx);
+		if (ball_dx < 0) 	ball_x -= abs(new_ball_dx);
+		else ball_x += abs(new_ball_dx);
 
-			if (ball_dy < 0) ball_y -= abs(new_ball_dy);
-			else ball_y += abs(new_ball_dy);
+		if (ball_dy < 0) ball_y -= abs(new_ball_dy);
+		else ball_y += abs(new_ball_dy);
 
-			brick_exact_vangse_x_axis = brick_number + 1;
-			return 1;
+		brick_exact_vangse_x_axis = brick_number + 1;
+		return 1;
 
-		}
-    
-		return 0;
+	}
+	return 0;
 }
