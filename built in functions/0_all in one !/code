@@ -1,0 +1,57 @@
+
+
+void iDraw()
+{
+
+	iClear();
+
+	background_image_set();
+	boat_image_set();
+	drawing_ball();
+	drawing_brick_rectangle();
+	drawing_brick_lines();
+
+}
+
+void iMouseMove(int mx, int my){}
+void iPassiveMouseMove(int mx, int my){}
+void iMouse(int button, int state, int mx, int my){}
+
+
+
+void iKeyboard(unsigned char key)
+{
+	if (key == ' ')
+	{
+		ball_movement_on = true;
+	}
+	if (key == 'w')
+	{
+		musicon = true;
+		PlaySound("music\\ocean.wav", NULL, SND_LOOP | SND_ASYNC);
+	}
+}
+
+
+void iSpecialKeyboard(unsigned char key)
+{
+
+	if (key == GLUT_KEY_RIGHT) right_key_movement();
+	if (key == GLUT_KEY_LEFT)  left_key_movement();
+
+}
+
+
+int main()
+{
+	if (musicon)
+		PlaySound("music\\ocean.wav", NULL, SND_LOOP | SND_ASYNC);
+	iSetTimer(function_speed, ball_movement_change);
+	iInitialize(screenwidth, screenheight, "IN YOUR SERVICE");
+	brick_coordination_set();
+	iStart();
+	return 0;
+}
+
+
+
