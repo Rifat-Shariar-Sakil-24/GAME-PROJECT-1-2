@@ -1,0 +1,17 @@
+void boat_image_set()
+{
+
+	iShowBMP2(boat_image_movement_x, boat_image_movement_y, boat[0], 255);
+
+
+	//iSetColor(0, 0, 0);
+	//iLine(499, 0, 499, 800);
+	//iLine(710, 0, 710, 800);
+	//iLine(0, 625, 1227, 625);
+
+	//iLine(0, 14, 1200, 14);
+
+
+	// boat length = 710 - 499 = 211
+	// boat image x - boat bottom x = 625 - 480 = 145; 
+}
