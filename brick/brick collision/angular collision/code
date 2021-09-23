@@ -1,0 +1,60 @@
+
+bool  angular_collision_detection(double brick_x, double brick_y, double brick_number, int sign_dx, int sign_dy)
+{
+
+	double ball_new_center_x = ball_x + ball_dx;
+	double ball_new_center_y = ball_y + ball_dy;
+	double x = (ball_new_center_x - brick_x);
+	double y = (ball_new_center_y - brick_y);
+	double distance = sqrt(x*x + y*y);
+
+
+	if (distance - ball_radius <= 0.001)
+	{
+		double a = brick_x;
+		double b = brick_y;
+		double r = ball_radius;
+
+		double nx = ball_x + ball_dx;
+		double ny = ball_y + ball_dy;
+
+
+		double p = abs(ball_dx / ball_dy);
+		double q = (p*ny) + nx;
+		double d = a - q;
+
+
+		double A = (1 + (p*p));
+		double B = (-(2 * b)) + (2 * p*d);
+		double C = (b*b) + (d*d) - (r*r);
+
+
+		double y1 = (-B + sqrt((B*B) - (4 * A*C))) / (2 * A);
+		double y2 = (-B - sqrt((B*B) - (4 * A*C))) / (2 * A);
+
+		double Y;
+		if (ball_dy < 0) Y = max(y1, y2);
+		else Y = min(y1, y2);
+		double X = (-p*Y) + q;
+
+
+
+		dy = abs(ball_y - Y);
+
+		dx = (ball_dx*dy) / ball_dy;
+		dx = abs(dx);
+
+		ball_x += (sign_dx*dx);
+		ball_y += (sign_dy*dy);
+		
+
+		ball_dx *= (-1);
+		ball_dy *= (-1);
+
+		brick_exact_vangse_xy_axis = brick_number + 1;
+		return 1;
+
+	}
+	return 0;
+}
+
