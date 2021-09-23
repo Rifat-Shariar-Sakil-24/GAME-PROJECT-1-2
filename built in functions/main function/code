@@ -1,0 +1,12 @@
+
+int main()
+{
+	if (musicon)
+		PlaySound("music\\ocean.wav", NULL, SND_LOOP | SND_ASYNC);
+	iSetTimer(function_speed, ball_movement_change);
+	iInitialize(screenwidth, screenheight, "IN YOUR SERVICE");
+	brick_coordination_set();
+	iStart();
+	return 0;
+}
+
