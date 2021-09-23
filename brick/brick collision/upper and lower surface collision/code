@@ -1,5 +1,5 @@
 
-bool upper_and_lower_collision_detection(int brick_number)
+bool upper_and_lower_surface_collision_detection(int brick_number)
 {
 	bool brick_vanish = 0;
 
