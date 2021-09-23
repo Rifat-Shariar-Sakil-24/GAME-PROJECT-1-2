@@ -1,0 +1,7 @@
+
+void drawing_ball()
+{
+	iSetColor(0, 0, 0);
+	//	cout  << ball_dx << " " << ball_dy << "    " << ball_x << " " << ball_y << endl;
+	iFilledCircle(ball_x, ball_y, ball_radius, 1000);
+}
