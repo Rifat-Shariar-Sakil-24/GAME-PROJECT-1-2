@@ -1,0 +1,4 @@
+void iPassiveMouseMove(int mx, int my)
+{
+
+}
