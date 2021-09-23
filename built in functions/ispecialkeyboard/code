@@ -1,0 +1,8 @@
+
+void iSpecialKeyboard(unsigned char key)
+{
+
+	if (key == GLUT_KEY_RIGHT) right_key_movement();
+	if (key == GLUT_KEY_LEFT)  left_key_movement();
+
+}
