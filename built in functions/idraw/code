@@ -1,1 +1,13 @@
 
+void iDraw()
+{
+
+	iClear();
+
+	background_image_set();
+	boat_image_set();
+	drawing_ball();
+	drawing_brick_rectangle();
+	drawing_brick_lines();
+
+}
