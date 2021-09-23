@@ -1,0 +1,24 @@
+void ball_movement_change()
+{
+
+	if (ball_movement_on)
+	{
+
+
+		int brick_vangse = brick_collision();
+		if (brick_vangse == 0)
+		{
+			if (ball_dy < 0) ball_movement_down();
+			else ball_movement_up();
+
+			if (ball_movement_on)
+			{
+				if (ball_dx < 0) ball_movement_left();
+				else ball_movement_right();
+			}
+
+		}
+
+	}
+
+}
