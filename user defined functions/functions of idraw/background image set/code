@@ -1,0 +1,5 @@
+void background_image_set()
+{
+	iShowBMP(0, 0, bg[0]);
+}
+
