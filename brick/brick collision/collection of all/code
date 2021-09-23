@@ -1,0 +1,270 @@
+
+
+bool  angular_collision_detection(double brick_x, double brick_y, double brick_number, int sign_dx, int sign_dy)
+{
+
+	double ball_new_center_x = ball_x + ball_dx;
+	double ball_new_center_y = ball_y + ball_dy;
+	double x = (ball_new_center_x - brick_x);
+	double y = (ball_new_center_y - brick_y);
+	double distance = sqrt(x*x + y*y);
+
+
+	if (distance - ball_radius <= 0.001)
+	{
+		double a = brick_x;
+		double b = brick_y;
+		double r = ball_radius;
+
+		double nx = ball_x + ball_dx;
+		double ny = ball_y + ball_dy;
+
+
+		double p = abs(ball_dx / ball_dy);
+		double q = (p*ny) + nx;
+		double d = a - q;
+
+
+		double A = (1 + (p*p));
+		double B = (-(2 * b)) + (2 * p*d);
+		double C = (b*b) + (d*d) - (r*r);
+
+
+		double y1 = (-B + sqrt((B*B) - (4 * A*C))) / (2 * A);
+		double y2 = (-B - sqrt((B*B) - (4 * A*C))) / (2 * A);
+
+		double Y;
+		if (ball_dy < 0) Y = max(y1, y2);
+		else Y = min(y1, y2);
+		double X = (-p*Y) + q;
+
+
+
+		ang_dy = abs(ball_y - Y);
+
+		ang_dx = (ball_dx*ang_dy) / ball_dy;
+		ang_dx = abs(ang_dx);
+
+		ball_x += (sign_dx*ang_dx);
+		ball_y += (sign_dy*ang_dy);
+
+
+		ball_dx *= (-1);
+		ball_dy *= (-1);
+
+		brick_exact_vangse_xy_axis = brick_number + 1;
+		return 1;
+
+	}
+	return 0;
+}
+
+
+
+
+bool upper_and_lower_surface_collision_detection(int brick_number)
+{
+	bool brick_vanish = 0;
+
+	if (ball_dy < 0)
+	{
+		if (ball_y - ball_radius + ball_dy - brick[brick_number].brick_y >= eps && ball_y - ball_radius + ball_dy - brick[brick_number].brick_y - brick_height <= eps)
+			brick_vanish = 1;
+	}
+
+	else if (ball_dy>0)
+	{
+
+		if ((brick[brick_number].brick_y + brick_height) - (ball_y + ball_radius + ball_dy) >= eps && ball_y + ball_radius + ball_dy - brick[brick_number].brick_y >= eps)
+			brick_vanish = 1;
+	}
+
+
+	if (brick_vanish)
+	{
+
+		double new_ball_dy;
+
+		if (ball_dy < 0){ new_ball_dy = -(ball_y - ball_radius - brick[brick_number].brick_y - brick_height); }
+		else{ new_ball_dy = abs(ball_y + ball_radius - brick[brick_number].brick_y); }
+
+		double new_ball_dx = (ball_dx*new_ball_dy) / ball_dy;
+
+		if (ball_dx<0) 	ball_x -= abs(new_ball_dx);
+		else ball_x += abs(new_ball_dx);
+
+		if (ball_dy<0) ball_y -= abs(new_ball_dy);
+		else ball_y += abs(new_ball_dy);
+
+		brick_exact_vangse_y_axis = brick_number + 1;
+		return 1;
+
+	}
+
+	return 0;
+}
+
+
+
+bool left_and_right_surface_collision_detection(int brick_number)
+{
+	bool brick_vanish = 0;
+
+	if (ball_dx < 0)
+	{
+		if (ball_x - ball_radius + ball_dx - brick[brick_number].brick_x >= eps && ball_x - ball_radius + ball_dx - brick[brick_number].brick_x - brick_width <= eps)
+			brick_vanish = 1;
+	}
+
+	else if (ball_dx>0)
+	{
+
+		if ((brick[brick_number].brick_x + brick_width) - (ball_x + ball_radius + ball_dx) >= eps && ball_x + ball_radius + ball_dx - brick[brick_number].brick_x >= eps)
+			brick_vanish = 1;
+	}
+
+	if (brick_vanish)
+	{
+
+		double new_ball_dx;
+
+		if (ball_dx < 0){ new_ball_dx = -(ball_x - ball_radius - brick[brick_number].brick_x - brick_width); }
+		else{ new_ball_dx = abs(ball_x + ball_radius - brick[brick_number].brick_x); }
+
+		double new_ball_dy = (ball_dy*new_ball_dx) / ball_dx;
+
+		if (ball_dx < 0) 	ball_x -= abs(new_ball_dx);
+		else ball_x += abs(new_ball_dx);
+
+		if (ball_dy < 0) ball_y -= abs(new_ball_dy);
+		else ball_y += abs(new_ball_dy);
+
+		brick_exact_vangse_x_axis = brick_number + 1;
+		return 1;
+
+	}
+	return 0;
+}
+
+
+int brick_collision()
+{
+	int vanished_brick_number = 0;
+
+	if (brick_exact_vangse_y_axis)
+	{
+
+		brick[brick_exact_vangse_y_axis - 1].brick_show = false;
+
+		ball_x += ball_dx;
+		ball_dy *= (-1);
+		ball_y += ball_dy;
+
+		brick_exact_vangse_y_axis = 0;
+
+		return -1;
+	}
+
+
+	if (brick_exact_vangse_x_axis)
+	{
+
+		brick[brick_exact_vangse_x_axis - 1].brick_show = false;
+
+		ball_y += ball_dy;
+		ball_dx *= (-1);
+		ball_x += ball_dx;
+
+		brick_exact_vangse_x_axis = 0;
+
+		return -1;
+	}
+
+
+	if (brick_exact_vangse_xy_axis)
+	{
+
+		brick[brick_exact_vangse_xy_axis - 1].brick_show = 0;
+
+
+
+		brick_exact_vangse_xy_axis = 0;
+
+		return -1;
+	}
+
+
+	brick_exact_vangse_y_axis = 0;
+	brick_exact_vangse_x_axis = 0;
+	brick_exact_vangse_xy_axis = 0;
+
+
+	for (int i = 0; i < total_brick; i++)
+	{
+		if (brick[i].brick_show)
+		{
+			if (ball_x >= brick[i].brick_x && ball_x <= brick[i].brick_x + brick_width)
+			{
+				if (upper_and_lower_surface_collision_detection(i))
+				{
+					vanished_brick_number = i + 1;
+					brick_exact_vangse_y_axis = i + 1;
+					break;
+				}
+
+			}
+			else if (ball_y >= brick[i].brick_y && ball_y <= brick[i].brick_y + brick_height)
+			{
+
+				if (left_and_right_surface_collision_detection(i))
+				{
+					vanished_brick_number = i + 1;
+					brick_exact_vangse_x_axis = i + 1;
+					break;
+				}
+
+
+
+			}
+
+
+
+			else
+			{
+
+				if (angular_collision_detection(brick[i].line_top_left[0], brick[i].line_top_left[1], i, 1, -1)) {
+					brick_exact_vangse_xy_axis = i + 1;
+					vanished_brick_number = i + 1;
+					break;
+				}
+
+				if (angular_collision_detection(brick[i].line_bottom_left[0], brick[i].line_bottom_left[1], i, 1, 1)) {
+					brick_exact_vangse_xy_axis = i + 1;
+					vanished_brick_number = i + 1;
+					break;
+				}
+
+
+				if (angular_collision_detection(brick[i].line_top_right[0], brick[i].line_top_right[1], i, -1, -1)) {
+					brick_exact_vangse_xy_axis = i + 1;
+					vanished_brick_number = i + 1;
+					break;
+				}
+
+				if (angular_collision_detection(brick[i].line_bottom_right[0], brick[i].line_bottom_right[1], i, -1, 1)) {
+					brick_exact_vangse_xy_axis = i + 1;
+					vanished_brick_number = i + 1;
+					break;
+				}
+
+			}
+
+		}
+
+	}
+
+
+
+	return vanished_brick_number;
+
+}
