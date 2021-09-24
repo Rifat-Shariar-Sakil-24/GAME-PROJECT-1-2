@@ -1,0 +1,4 @@
+/*variables for exact movement for the ball in each direction*/
+bool ball_hit_the_boat = 0; 
+bool bottom_par_or_boat_touched = 0; 
+double ball_exact_dy;
