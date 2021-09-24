@@ -1,0 +1,31 @@
+
+void new_start()
+{
+
+
+	boat_image_movement_x = boat_image_x;
+	boat_image_movement_y = boat_image_y;
+
+
+	boat_bottom_left_x = boat_bottom_left_main_x;
+	boat_bottom_right_x = boat_bottom_right_main_x;
+	boat_bottom_y = boat_bottom_main_y;
+
+
+
+	boat_bottom_length = boat_bottom_right_x - boat_bottom_left_x;
+
+	ball_x = (boat_bottom_length / 2) + boat_bottom_left_x;
+	ball_y = boat_bottom_y - ball_radius;
+
+
+
+	velocity = main_velocity;
+	angle = main_angle;
+	ball_dx = ball_main_dx;
+	ball_dy = ball_main_dy;
+
+	direction_change_on_colusion = 0;
+	ball_movement_on = false;
+
+}
