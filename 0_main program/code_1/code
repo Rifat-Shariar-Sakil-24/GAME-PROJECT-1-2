@@ -4,7 +4,7 @@ using namespace std;
 
 #define screenwidth 1227
 #define screenheight 800
-#define function_speed 100
+#define function_speed 20
 #define total_brick 60
 #define left_par 14
 #define right_par 13
