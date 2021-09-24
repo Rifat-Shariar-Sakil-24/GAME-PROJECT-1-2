@@ -1,1 +1,6 @@
 
+/*brick boundary line color code*/
+int line_r = 255;
+int line_g = 255;
+int line_b = 255;
+
