@@ -1,0 +1,17 @@
+
+/*boat bottom surface coordination*/
+double boat_bottom_left_main_x = 499;
+double boat_bottom_right_main_x = 710;
+double boat_bottom_main_y = 625;
+
+double boat_bottom_left_x = boat_bottom_left_main_x;
+double boat_bottom_right_x = boat_bottom_right_main_x;
+double boat_bottom_y = boat_bottom_main_y;
+
+
+/*boat bottom surface length*/
+double boat_bottom_length = boat_bottom_right_x - boat_bottom_left_x; // = 211;
+
+
+/*boat movement with keyboard*/
+double boat_keyboard_dx = 20;
