@@ -1,1 +1,15 @@
 
+
+void drawing_brick_rectangle()
+{
+
+	for (int i = 0; i < total_brick; i++)
+	{
+		if (brick[i].brick_show)
+		{
+			iSetColor(brick_r, brick_g, brick_b);
+			iFilledRectangle(brick[i].brick_x, brick[i].brick_y, brick_width, brick_height);
+		}
+	}
+
+}
