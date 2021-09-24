@@ -1,0 +1,27 @@
+
+
+void background_image_set();
+void boat_image_set();
+void drawing_brick_rectangle();
+void drawing_brick_lines();
+void drawing_ball();
+void right_key_movement();
+void left_key_movement();
+void brick_coordination_set();
+void ball_movement_change();
+void ball_movement_left();
+void ball_movement_right();
+void ball_movement_down();
+void ball_movement_up();
+void new_start();
+
+
+
+
+int brick_collision();
+bool game_over();
+
+
+bool angular_collision_detection(double xx, double yy, double nn, int sp, int sn);
+bool upper_and_lower_surface_collision_detection(int ii);
+bool left_and_right_surface_collision_detection(int ii);
