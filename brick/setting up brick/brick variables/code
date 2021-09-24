@@ -1,1 +1,28 @@
 
+/*structure of bricks*/
+struct brick_sructure
+{
+	double brick_x;
+	double brick_y;
+
+
+	double line_top_left[2];
+	double line_top_right[2];
+	double line_bottom_right[2];
+	double line_bottom_left[2];
+
+	bool brick_show = true;
+
+};
+
+
+/*brick boundary line color code*/
+int line_r = 255;
+int line_g = 255;
+int line_b = 255;
+
+
+/*rectangle color code*/
+int brick_r = 82;
+int brick_g = 82;
+int brick_b = 82;
