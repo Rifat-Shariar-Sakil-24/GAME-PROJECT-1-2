@@ -1,4 +1,27 @@
 
+/*boat*/
+
+/*boat image address*/
+char boat[1][20] = { "image\\boatfinal.bmp" };
+
+
+/* boat original image size
+image x = 286px
+image y = 215px;
+*/
+
+
+/*boat main image coordination*/
+double boat_image_x = 480; // 613-(286/2); // 613 = half of screenwidth, 286 = boat bottom surface length
+double boat_image_y = 565;
+
+
+/*saving movement of boat (original image)*/
+double boat_image_movement_x = boat_image_x;
+double boat_image_movement_y = boat_image_y;
+
+
+
 /*boat bottom surface coordination*/
 double boat_bottom_left_main_x = 499;
 double boat_bottom_right_main_x = 710;
@@ -15,3 +38,5 @@ double boat_bottom_length = boat_bottom_right_x - boat_bottom_left_x; // = 211;
 
 /*boat movement with keyboard*/
 double boat_keyboard_dx = 20;
+
+
