@@ -1,5 +1,0 @@
-
-/*brick color code*/
-int brick_r = 82;
-int brick_g = 82;
-int brick_b = 82;
