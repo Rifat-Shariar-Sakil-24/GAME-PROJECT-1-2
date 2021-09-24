@@ -1,0 +1,18 @@
+
+/*ball*/
+int ball_radius = 20;
+double ball_x = (boat_bottom_length / 2) + boat_bottom_left_x;
+double ball_y = boat_bottom_y - ball_radius;
+double ball_main_dx = 7;
+double ball_main_dy = -10;
+
+double main_velocity = 10;
+double main_angle = 30;
+double  velocity = main_velocity;
+double angle = main_angle;
+double ball_dx = ball_main_dx;
+double ball_dy = ball_main_dy;
+
+double ball_movement_on = false;
+bool direction_change_on_colusion = false;
+
