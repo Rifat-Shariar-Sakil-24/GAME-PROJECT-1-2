@@ -455,11 +455,11 @@ void brick_coordination_set()
 	brick[59].line_top_left[0] = brick[59].brick_x;
 	brick[59].line_top_left[1] = brick[59].brick_y + 30;;
 
-	brick[59].line_bottom_right[0] = brick[59].brick_x+100;
+	brick[59].line_bottom_right[0] = brick[59].brick_x + 100;
 	brick[59].line_bottom_right[1] = brick[59].brick_y;
 
 	brick[59].line_top_right[0] = brick[59].brick_x + 100;
-	brick[59].line_top_right[1] = brick[59].brick_y+30;
+	brick[59].line_top_right[1] = brick[59].brick_y + 30;
 
 
 
@@ -677,8 +677,8 @@ bool  angular_collision_detection(double brick_x, double brick_y, double brick_n
 		ang_dx = (ball_dx*ang_dy) / ball_dy;
 		ang_dx = abs(ang_dx);
 
+
 		ball_x += (sign_dx*ang_dx);
-		ball_x += (1*ang_dx);
 		ball_y += (sign_dy*ang_dy);
 
 
