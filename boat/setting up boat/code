@@ -1,0 +1,6 @@
+
+/*boat*/
+
+/*boat image address*/
+char boat[1][20] = { "image\\boatfinal.bmp" };
+
