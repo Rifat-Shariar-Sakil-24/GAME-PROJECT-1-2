@@ -1,0 +1,2 @@
+/*taking a brick structure*/
+brick_sructure brick[total_brick];
