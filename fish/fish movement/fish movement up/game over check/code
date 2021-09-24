@@ -1,0 +1,5 @@
+bool game_over()
+{
+	if (ball_x >= boat_bottom_left_x && ball_x <= boat_bottom_right_x)return true;
+	return false;
+}
