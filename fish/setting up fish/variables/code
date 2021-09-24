@@ -13,6 +13,6 @@ double angle = main_angle;
 double ball_dx = ball_main_dx;
 double ball_dy = ball_main_dy;
 
-double ball_movement_on = false;
+bool ball_movement_on = false;
 bool direction_change_on_colusion = false;
 
