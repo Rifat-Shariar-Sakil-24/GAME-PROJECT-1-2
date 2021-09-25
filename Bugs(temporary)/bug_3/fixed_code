@@ -1,0 +1,1061 @@
+#include<iostream>
+using namespace std;
+#include "iGraphics.h"
+
+#define screenwidth 1227
+#define screenheight 800
+#define function_speed 200
+#define total_brick 60
+#define left_par 14
+#define right_par 13
+#define bottom_par 15
+#define brick_shuru_y 15
+#define brick_width  100
+#define brick_height  30
+#define brick_col 5
+#define brick_row 12
+#define eps 0.0001
+#define PI acos(-1)
+
+struct brick_sructure
+{
+	double brick_x;
+	double brick_y;
+
+
+	double line_top_left[2];
+	double line_top_right[2];
+	double line_bottom_right[2];
+	double line_bottom_left[2];
+
+	bool brick_show = true;
+
+};
+
+brick_sructure brick[total_brick];
+
+
+
+int brick_r = 82;
+int brick_g = 82;
+int brick_b = 82;
+
+
+
+int line_r = 255;
+int line_g = 255;
+int line_b = 255;
+
+
+
+
+
+double ang_dx, ang_dy;
+
+
+int brick_exact_vangse_x_axis = 0;
+int brick_exact_vangse_y_axis = 0;
+int brick_exact_vangse_xy_axis = 0;
+
+
+
+
+char bg[1][20] = { "image\\final_bg.bmp" };
+char boat[1][20] = { "image\\boatfinal.bmp" };
+
+
+
+
+/* boat original image size
+image x = 286px
+image y = 215px;
+*/
+
+
+/*boat main image coordination*/
+double boat_image_x = 480; // 613-(286/2); // 613 = half of screenwidth, 286 = boat bottom surface length
+double boat_image_y = 565;
+
+
+/*saving movement of boat (original image)*/
+double boat_image_movement_x = boat_image_x;
+double boat_image_movement_y = boat_image_y;
+
+
+
+/*boat bottom surface coordination*/
+double boat_bottom_left_main_x = 499;
+double boat_bottom_right_main_x = 710;
+double boat_bottom_main_y = 625;
+
+double boat_bottom_left_x = boat_bottom_left_main_x;
+double boat_bottom_right_x = boat_bottom_right_main_x;
+double boat_bottom_y = boat_bottom_main_y;
+
+
+/*boat bottom surface length*/
+double boat_bottom_length = boat_bottom_right_x - boat_bottom_left_x; // = 211;
+
+
+/*boat movement with keyboard*/
+double boat_keyboard_dx = 20;
+
+
+
+
+/*ball*/
+int ball_radius = 30;
+double ball_x = (boat_bottom_length / 2) + boat_bottom_left_x;
+double ball_y = boat_bottom_y - ball_radius;
+double ball_main_dx = 7;
+double ball_main_dy = -10;
+
+double main_velocity = 10;
+double main_angle = 30;
+double  velocity = main_velocity;
+double angle = main_angle;
+double ball_dx = ball_main_dx;
+double ball_dy = ball_main_dy;
+
+bool ball_movement_on = false;
+bool direction_change_on_colusion = false;
+
+
+
+/*Music*/
+bool musicon = false;
+
+/*variables for exact movement for the ball in each direction*/
+bool ball_hit_the_boat = 0;
+bool bottom_par_or_boat_touched = 0;
+double ball_exact_dy;
+
+/*added functions*/
+
+
+void background_image_set();
+void boat_image_set();
+void drawing_brick_rectangle();
+void drawing_brick_lines();
+void drawing_ball();
+void right_key_movement();
+void left_key_movement();
+void brick_coordination_set();
+void ball_movement_change();
+void ball_movement_left();
+void ball_movement_right();
+void ball_movement_down();
+void ball_movement_up();
+void new_start();
+
+
+
+
+int brick_collision();
+bool game_over();
+
+
+bool angular_collision_detection(double xx, double yy, int ii, int sx, int sy);
+bool angular_collision_detection_bottom_left(double xx, double yy, int ii);
+bool upper_and_lower_surface_collision_detection(int ii);
+bool left_and_right_surface_collision_detection(int ii);
+
+
+
+
+
+void iDraw()
+{
+
+	iClear();
+
+	background_image_set();
+	boat_image_set();
+	drawing_ball();
+	drawing_brick_rectangle();
+	drawing_brick_lines();
+
+}
+
+void iMouseMove(int mx, int my){}
+void iPassiveMouseMove(int mx, int my){}
+void iMouse(int button, int state, int mx, int my){}
+
+
+
+void iKeyboard(unsigned char key)
+{
+	if (key == ' ')
+	{
+		ball_movement_on = true;
+	}
+	if (key == 'w')
+	{
+		musicon = true;
+		PlaySound("music\\ocean.wav", NULL, SND_LOOP | SND_ASYNC);
+	}
+}
+
+
+void iSpecialKeyboard(unsigned char key)
+{
+
+	if (key == GLUT_KEY_RIGHT) right_key_movement();
+	if (key == GLUT_KEY_LEFT)  left_key_movement();
+
+}
+
+
+int main()
+{
+	if (musicon)
+		PlaySound("music\\ocean.wav", NULL, SND_LOOP | SND_ASYNC);
+	iSetTimer(function_speed, ball_movement_change);
+	iInitialize(screenwidth, screenheight, "IN YOUR SERVICE");
+	brick_coordination_set();
+	iStart();
+	return 0;
+}
+
+
+
+
+
+////////////////////////////////////////// BACKGROUND IMAGE SET //////////////////////////////////////////////////
+
+void background_image_set()
+{
+	iShowBMP(0, 0, bg[0]);
+}
+
+
+
+
+
+
+
+////////////////////////////////////////////// BOAT IMAGE SET ////////////////////////////////////////////////////
+
+void boat_image_set()
+{
+
+	iShowBMP2(boat_image_movement_x, boat_image_movement_y, boat[0], 255);
+
+
+	//iSetColor(0, 0, 0);
+	//iLine(499, 0, 499, 800);
+	//iLine(710, 0, 710, 800);
+	//iLine(0, 625, 1227, 625);
+
+	//iLine(0, 14, 1200, 14);
+
+
+	// boat length = 710 - 499 = 211
+	// boat image x - boat bottom x = 625 - 480 = 145; 
+}
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////// BALL DRAW /////////////////////////////////////////////////////////
+
+void drawing_ball()
+{
+	iSetColor(0, 0, 0);
+	//	cout  << ball_dx << " " << ball_dy << "    " << ball_x << " " << ball_y << endl;
+	iFilledCircle(ball_x, ball_y, ball_radius, 1000);
+}
+
+
+
+
+
+/////////////////////////////////////////////////// BRICK DRAW //////////////////////////////////////////////////////
+
+void drawing_brick_rectangle()
+{
+
+	for (int i = 0; i < total_brick; i++)
+	{
+		if (brick[i].brick_show)
+		{
+			iSetColor(brick_r, brick_g, brick_b);
+			iFilledRectangle(brick[i].brick_x, brick[i].brick_y, brick_width, brick_height);
+		}
+	}
+
+}
+
+
+
+
+
+////////////////////////////////////////// BRICK BOUNDARY LINES DRAW //////////////////////////////////////////////////
+
+void drawing_brick_lines()
+{
+
+	for (int i = 0; i < total_brick; i++)
+	{
+		if (brick[i].brick_show)
+		{
+
+			iSetColor(line_r, line_g, line_b);
+
+			iLine(brick[i].line_top_left[0], brick[i].line_top_left[1], brick[i].line_top_right[0], brick[i].line_top_right[1]);
+			iLine(brick[i].line_top_left[0], brick[i].line_top_left[1], brick[i].line_bottom_left[0], brick[i].line_bottom_left[1]);
+			iLine(brick[i].line_bottom_left[0], brick[i].line_bottom_left[1], brick[i].line_bottom_right[0], brick[i].line_bottom_right[1]);
+			iLine(brick[i].line_bottom_right[0], brick[i].line_bottom_right[1], brick[i].line_top_right[0], brick[i].line_top_right[1]);
+		}
+	}
+}
+
+
+
+
+
+
+
+////////////////////////////////////////// KEYBOARD RIGHT KEY MOVEMENT ////////////////////////////////////////////
+
+void right_key_movement()
+{
+
+	double total = boat_bottom_right_x + boat_keyboard_dx; // right movement of boat in X axis for movement key(right arrow)
+
+	double ball_move; // for every click on right movement key of boat, the ball will also move if the ball movement is off. ball_move indicates how much the ball will move in X axis for every movement key click 
+
+	if (total - (screenwidth - right_par) <= eps) // boat can move freely with the defined  movement value for right movement key
+	{
+		boat_image_movement_x += boat_keyboard_dx; // boat main moves 
+		boat_bottom_left_x += boat_keyboard_dx;    // the bottom left corner of the boat moves
+		boat_bottom_right_x += boat_keyboard_dx;   // he bottom right corner of the boat moves
+		ball_move = boat_keyboard_dx;
+
+	}
+
+	else     //at some positions of the boat in X axis, it won't move that much what it was supposed to.
+	{
+
+		double exact_boat_movement_X_axis = screenwidth - right_par - 3 - total + boat_keyboard_dx; // appropiate amount of movement in X axis for right movement key
+
+		boat_image_movement_x += exact_boat_movement_X_axis;  // boat image moves some certain amount such that its right side doesn't cross right_par
+		boat_bottom_left_x += exact_boat_movement_X_axis;     // boat bottom left corner will also move along with its holding picture
+		boat_bottom_right_x += exact_boat_movement_X_axis;    // boat bottom left corner will also move along with its holding picture
+		ball_move = exact_boat_movement_X_axis;
+	}
+
+	if (ball_movement_on == false) ball_x += ball_move; // if ball movement is off , ball will also move if the boat moves. Amount of movement will be the same of boat movement
+
+
+}
+
+
+
+
+
+
+
+//////////////////////////////////////////// KEYBOARD LEFT KEY MOVEMENT ////////////////////////////////////////////
+
+
+void left_key_movement()
+{
+	double total = boat_bottom_left_x - boat_keyboard_dx; // left movement of boat in X axis for left movement key(left arrow)
+
+	double ball_move;  // for every click on left movement key, the ball will also move if the ball movement is off. ball_move indicates how much the ball will move in X axis for every left movement key click 
+
+	if (total >= left_par + 5)  // boat can move freely with the defined movement value for left movement key
+	{
+		boat_image_movement_x -= boat_keyboard_dx;  // boat image moves 
+		boat_bottom_left_x -= boat_keyboard_dx;     // the bottom left corner of the boat moves
+		boat_bottom_right_x -= boat_keyboard_dx;    // the bottom right corner of the boat moves
+		ball_move = boat_keyboard_dx;
+
+	}
+
+	else    //at some positions of the boat in X axis, it won't move that much what it was supposed to.
+	{
+
+		double exact_boat_movement_X_axis = boat_bottom_left_x - left_par - 5;
+
+		boat_image_movement_x -= exact_boat_movement_X_axis;   // boat image moves some certain amount such that its left side doesn't cross left_par
+		boat_bottom_left_x -= exact_boat_movement_X_axis;      //  boat bottom left corner will also move along with its holding picture
+		boat_bottom_right_x -= exact_boat_movement_X_axis;     //  boat bottom right corner will also move along with its holding picture
+		ball_move = exact_boat_movement_X_axis;
+	}
+
+	if (ball_movement_on == false) ball_x -= ball_move;  // if ball movement is off , ball will also move if the boat moves. Amount of movement will be the same of boat movement
+
+}
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////// GIVING COORDINATION TO BRICKS //////////////////////////////////////////
+void brick_coordination_set()
+{
+
+	/*first brick's coordination*/
+	double starting_x = left_par;
+	double starting_y = brick_shuru_y;
+
+	int brick_number = 0;
+
+	for (int i = 0; i < brick_col; i++)
+	{
+		for (int j = 0; j < brick_row; j++)
+		{
+
+			brick[brick_number].brick_x = starting_x;
+			brick[brick_number].brick_y = starting_y;
+
+
+			/*setting up line for bricks*/
+			brick[brick_number].line_bottom_left[0] = starting_x;
+			brick[brick_number].line_bottom_left[1] = starting_y;
+
+			brick[brick_number].line_top_left[0] = starting_x;
+			brick[brick_number].line_top_left[1] = starting_y + brick_height;
+
+
+
+			starting_x += brick_width;
+
+
+			brick[brick_number].line_bottom_right[0] = starting_x;
+			brick[brick_number].line_bottom_right[1] = starting_y;
+
+
+			brick[brick_number].line_top_right[0] = starting_x;
+			brick[brick_number].line_top_right[1] = starting_y + brick_height;
+
+
+
+			brick_number++;
+		}
+
+		starting_x = left_par;
+		starting_y += brick_height;
+	}
+	int gg = 15;
+
+	brick[58].brick_x = 505 + 200;
+	brick[58].brick_y = 440 + gg;
+
+	brick[58].line_bottom_left[0] = brick[58].brick_x;
+	brick[58].line_bottom_left[1] = brick[58].brick_y;
+
+	brick[58].line_top_left[0] = brick[58].brick_x;
+	brick[58].line_top_left[1] = brick[58].brick_y + 30;;
+
+	brick[58].line_bottom_right[0] = brick[58].brick_x + 100;
+	brick[58].line_bottom_right[1] = brick[58].brick_y;
+
+	brick[58].line_top_right[0] = brick[58].brick_x + 100;
+	brick[58].line_top_right[1] = brick[58].brick_y + 30;
+
+
+
+	brick[59].brick_x = 605 + 100;
+	brick[59].brick_y = 440 + gg + 30;
+
+	brick[59].line_bottom_left[0] = brick[59].brick_x;
+	brick[59].line_bottom_left[1] = brick[59].brick_y;
+
+	brick[59].line_top_left[0] = brick[59].brick_x;
+	brick[59].line_top_left[1] = brick[59].brick_y + 30;;
+
+	brick[59].line_bottom_right[0] = brick[59].brick_x + 100;
+	brick[59].line_bottom_right[1] = brick[59].brick_y;
+
+	brick[59].line_top_right[0] = brick[59].brick_x + 100;
+	brick[59].line_top_right[1] = brick[59].brick_y + 30;
+
+
+
+
+
+	brick[57].brick_x = 605 + 100;
+	brick[57].brick_y = 440 - 30 + gg;
+
+	brick[57].line_bottom_left[0] = brick[57].brick_x;
+	brick[57].line_bottom_left[1] = brick[57].brick_y;
+
+	brick[57].line_top_left[0] = brick[57].brick_x;
+	brick[57].line_top_left[1] = brick[57].brick_y + 30;;
+
+	brick[57].line_bottom_right[0] = brick[57].brick_x + 100;
+	brick[57].line_bottom_right[1] = brick[57].brick_y;
+
+	brick[57].line_top_right[0] = brick[57].brick_x + 100;
+	brick[57].line_top_right[1] = brick[57].brick_y + 30;
+
+}
+
+
+
+
+
+
+
+////////////////////////////////////////////// BALL MOVEMENT CHANGE /////////////////////////////////////////////////////////////
+
+void ball_movement_change()
+{
+
+	if (ball_movement_on)
+	{
+
+
+		int brick_vangse = brick_collision();
+		if (brick_vangse == 0)
+		{
+			if (ball_dy < 0) ball_movement_down();
+			else ball_movement_up();
+
+			if (ball_movement_on)
+			{
+				if (ball_dx < 0) ball_movement_left();
+				else ball_movement_right();
+			}
+
+		}
+
+	}
+
+}
+
+
+
+
+
+
+////////////////////////////////////////////// BRICK COLLUSION ////////////////////////////////////////////////////
+
+int brick_collision()
+{
+	int vanished_brick_number = 0;
+
+	if (brick_exact_vangse_y_axis)
+	{
+
+		brick[brick_exact_vangse_y_axis - 1].brick_show = false;
+
+		ball_x += ball_dx;
+		ball_dy *= (-1);
+		ball_y += ball_dy;
+
+		brick_exact_vangse_y_axis = 0;
+
+		return -1;
+	}
+
+
+	if (brick_exact_vangse_x_axis)
+	{
+
+		brick[brick_exact_vangse_x_axis - 1].brick_show = false;
+
+		ball_y += ball_dy;
+		ball_dx *= (-1);
+		ball_x += ball_dx;
+
+		brick_exact_vangse_x_axis = 0;
+
+		return -1;
+	}
+
+
+	if (brick_exact_vangse_xy_axis)
+	{
+
+		brick[brick_exact_vangse_xy_axis - 1].brick_show = 0;
+
+
+
+		brick_exact_vangse_xy_axis = 0;
+
+		return -1;
+	}
+
+
+	brick_exact_vangse_y_axis = 0;
+	brick_exact_vangse_x_axis = 0;
+	brick_exact_vangse_xy_axis = 0;
+
+
+	for (int i = 0; i < total_brick; i++)
+	{
+		if (brick[i].brick_show)
+		{
+			if (ball_x >= brick[i].brick_x && ball_x <= brick[i].brick_x + brick_width)
+			{
+				if (upper_and_lower_surface_collision_detection(i))
+				{
+					vanished_brick_number = i + 1;
+					brick_exact_vangse_y_axis = i + 1;
+					break;
+				}
+
+			}
+			else if (ball_y >= brick[i].brick_y && ball_y <= brick[i].brick_y + brick_height)
+			{
+
+				if (left_and_right_surface_collision_detection(i))
+				{
+					vanished_brick_number = i + 1;
+					brick_exact_vangse_x_axis = i + 1;
+					break;
+				}
+
+
+
+			}
+
+		}
+
+	}
+
+	for (int i = 0; i < total_brick; i++)
+	{
+		if (brick[i].brick_show && vanished_brick_number == 0)
+		{
+
+
+			if (angular_collision_detection(brick[i].line_top_left[0], brick[i].line_top_left[1], i,1,-1)) {
+				brick_exact_vangse_xy_axis = i + 1;
+				vanished_brick_number = i + 1;
+				break;
+			}
+
+			if (angular_collision_detection(brick[i].line_top_right[0], brick[i].line_top_right[1], i, -1, -1)) {
+				brick_exact_vangse_xy_axis = i + 1;
+				vanished_brick_number = i + 1;
+				break;
+			}
+
+			if(angular_collision_detection(brick[i].line_bottom_left[0], brick[i].line_bottom_left[1], i, 1, 1)) {
+				brick_exact_vangse_xy_axis = i + 1;
+				vanished_brick_number = i + 1;
+				break;
+			}
+			
+
+			if (angular_collision_detection(brick[i].line_bottom_right[0], brick[i].line_bottom_right[1], i, -1, 1)) {
+				brick_exact_vangse_xy_axis = i + 1;
+				vanished_brick_number = i + 1;
+				break;
+			}
+
+
+		}
+	}
+
+	return vanished_brick_number;
+
+}
+
+
+
+
+bool  angular_collision_detection(double brick_x, double brick_y, int brick_number, int sign_x, int sign_y)
+{
+	
+	double ball_new_center_x = ball_x + ball_dx;
+	double ball_new_center_y = ball_y + ball_dy;
+	double x = (ball_new_center_x - brick_x);
+	double y = (ball_new_center_y - brick_y);
+	double distance = sqrt(x*x + y*y);
+
+
+	if (distance - ball_radius <= 0.001)
+	{
+		double a = brick_x;
+		double b = brick_y;
+		double r = ball_radius;
+
+		double nx = ball_x + ball_dx;
+		double ny = ball_y + ball_dy;
+
+
+		double p = ball_dx / ball_dy;
+		double q = - (p*ny) + nx;
+		double d = a - q;
+
+
+		double A = (1 + (p*p));
+		double B = -((2 * b) + (2 * p*d));
+		double C = (b*b) + (d*d) - (r*r);
+
+
+		double y1 = (-B + sqrt((B*B) - (4 * A*C))) / (2 * A);
+		double y2 = (-B - sqrt((B*B) - (4 * A*C))) / (2 * A);
+
+		double Y;
+		if (ball_dy < 0) Y = max(y1, y2);
+		else Y = min(y1, y2);
+		double X = (p*Y) + q;
+
+
+
+		ang_dy = abs(ball_y - Y);
+
+		ang_dx = (ball_dx*ang_dy) / ball_dy;
+		ang_dx = abs(ang_dx);
+
+		ball_x += (sign_x*ang_dx);
+		ball_y += (sign_y*ang_dy);
+
+
+		ball_dx *= (-1);
+		ball_dy *= (-1);
+
+		brick_exact_vangse_xy_axis = brick_number + 1;
+		return 1;
+
+	}
+	return 0;
+}
+
+
+
+
+bool upper_and_lower_surface_collision_detection(int brick_number)
+{
+	bool brick_vanish = 0;
+
+	if (ball_dy < 0)
+	{
+		if (ball_y - ball_radius + ball_dy - brick[brick_number].brick_y >= eps && ball_y - ball_radius + ball_dy - brick[brick_number].brick_y - brick_height <= eps)
+			brick_vanish = 1;
+	}
+
+	else if (ball_dy>0)
+	{
+
+		if ((brick[brick_number].brick_y + brick_height) - (ball_y + ball_radius + ball_dy) >= eps && ball_y + ball_radius + ball_dy - brick[brick_number].brick_y >= eps)
+			brick_vanish = 1;
+	}
+
+
+	if (brick_vanish)
+	{
+
+		double new_ball_dy;
+
+		if (ball_dy < 0){ new_ball_dy = -(ball_y - ball_radius - brick[brick_number].brick_y - brick_height); }
+		else{ new_ball_dy = abs(ball_y + ball_radius - brick[brick_number].brick_y); }
+
+		double new_ball_dx = (ball_dx*new_ball_dy) / ball_dy;
+
+		if (ball_dx<0) 	ball_x -= abs(new_ball_dx);
+		else ball_x += abs(new_ball_dx);
+
+		if (ball_dy<0) ball_y -= abs(new_ball_dy);
+		else ball_y += abs(new_ball_dy);
+
+		brick_exact_vangse_y_axis = brick_number + 1;
+		return 1;
+
+	}
+
+	return 0;
+}
+
+
+
+bool left_and_right_surface_collision_detection(int brick_number)
+{
+	bool brick_vanish = 0;
+
+	if (ball_dx < 0)
+	{
+		if (ball_x - ball_radius + ball_dx - brick[brick_number].brick_x >= eps && ball_x - ball_radius + ball_dx - brick[brick_number].brick_x - brick_width <= eps)
+			brick_vanish = 1;
+	}
+
+	else if (ball_dx>0)
+	{
+
+		if ((brick[brick_number].brick_x + brick_width) - (ball_x + ball_radius + ball_dx) >= eps && ball_x + ball_radius + ball_dx - brick[brick_number].brick_x >= eps)
+			brick_vanish = 1;
+	}
+
+	if (brick_vanish)
+	{
+
+		double new_ball_dx;
+
+		if (ball_dx < 0){ new_ball_dx = -(ball_x - ball_radius - brick[brick_number].brick_x - brick_width); }
+		else{ new_ball_dx = abs(ball_x + ball_radius - brick[brick_number].brick_x); }
+
+		double new_ball_dy = (ball_dy*new_ball_dx) / ball_dx;
+
+		if (ball_dx < 0) 	ball_x -= abs(new_ball_dx);
+		else ball_x += abs(new_ball_dx);
+
+		if (ball_dy < 0) ball_y -= abs(new_ball_dy);
+		else ball_y += abs(new_ball_dy);
+
+		brick_exact_vangse_x_axis = brick_number + 1;
+		return 1;
+
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+//////////////////////////////////////////////// BALL MOVEMENT TO LEFT ///////////////////////////////////////////////////////////////////////////
+
+
+void ball_movement_left()
+{
+	double destination_x_axis = ball_x - ball_radius + ball_dx;  // checks the final destination covered in X axis if ball_dx is fully calculated
+	double ball_exact_dx; // variable to reduce ball_dx in respect to appropate ball_dy
+
+	if (destination_x_axis - left_par <= eps)   // checking if the ball crosses right_par or not 
+	{
+		/*ball won't cross right_par*/
+
+		ball_exact_dx = ball_x - ball_radius - left_par; // taking appropiate ball_dx
+		ball_exact_dy = abs((ball_dy*ball_exact_dx) / ball_dx);  // now ball_dy will also be updated because of the update of ball_dx as ball_dx crossed the right_par and we were working with full ball_dy
+
+
+		if (ball_dy > 0)
+		{
+			/*execute the ball_dy of before and include appropiate ball_dy*/
+			if (bottom_par_or_boat_touched) ball_y = ball_y + ball_dy - ball_exact_dy;
+			else ball_y = ball_y - ball_dy + ball_exact_dy;
+		}
+
+		else
+		{
+			/*execute the ball_dy of before and include appropiate ball_dy*/
+			if (bottom_par_or_boat_touched) ball_y = ball_y - abs(ball_dy) + ball_exact_dy;
+			else ball_y = ball_y + abs(ball_dy) - ball_exact_dy;
+		}
+
+		bottom_par_or_boat_touched = false;   // after this operation ball won't be touched with any of the boat or bottom par
+		ball_dx = -ball_dx; // change the direction in X axis
+	}
+
+	else
+	{
+
+		if (bottom_par_or_boat_touched) // checks if the boat is touched with the bottom_par or with the boat
+		{
+			ball_exact_dx = abs((ball_dx*ball_exact_dy) / ball_dy); // ball is touched with any of the boat or bottom_par, so appropiate ball dx will also change
+			bottom_par_or_boat_touched = false;  // after this operation ball won't be touched with any of the boat or bottom par
+		}
+
+		else ball_exact_dx = ball_dx;  // take full ball_dx as the ball neither crosses 
+
+	}
+
+	ball_x -= abs(ball_exact_dx);  // include new ball_dx 
+
+}
+
+
+
+
+
+
+
+//////////////////////////////////////// BALL MOVEMENT TO RIGHT /////////////////////////////////////////////////////////////////
+
+void ball_movement_right()
+{
+
+	double destination_x_axis = ball_x + ball_radius + ball_dx;  // checks the final destination covered in X axis if ball_dx is fully calculated
+	double ball_exact_dx; // variable to reduce ball_dx in respect to appropate ball_dy
+
+	if (destination_x_axis - (screenwidth - right_par) > eps)   // checking if the ball crosses right_par or not 
+	{
+		/*ball won't cross right_par*/
+
+		ball_exact_dx = screenwidth - right_par - ball_x - ball_radius; // taking appropiate ball_dx
+		ball_exact_dy = abs((ball_dy*ball_exact_dx) / ball_dx);  // now ball_dy will also be updated because of the update of ball_dx as ball_dx crossed the right_par and we were working with full ball_dy
+
+
+		if (ball_dy > 0)
+		{
+			/*execlude the ball_dy of before and include the appropiate ball_dy*/
+			if (bottom_par_or_boat_touched) ball_y = ball_y + ball_dy - ball_exact_dy;
+			else ball_y = ball_y - ball_dy + ball_exact_dy;
+		}
+
+		else
+		{
+			/*execlude the ball_dy of before and include the appropiate ball_dy*/
+			if (bottom_par_or_boat_touched) ball_y = ball_y - abs(ball_dy) + ball_exact_dy;
+			else ball_y = ball_y + abs(ball_dy) - ball_exact_dy;
+		}
+
+		bottom_par_or_boat_touched = false;   // after this operation ball won't be touched with any of the boat or bottom par
+		ball_dx = -ball_dx; // change the direction in X axis
+	}
+
+	else
+	{
+
+		if (bottom_par_or_boat_touched) // checks if the boat is touched with the bottom_par or with the boat
+		{
+			ball_exact_dx = abs((ball_dx*ball_exact_dy) / ball_dy); // ball is touched with any of the boat or bottom_par, so appropiate ball dx will also change
+			bottom_par_or_boat_touched = false;  // after this operation ball won't be touched with any of the boat or bottom par
+		}
+
+		else ball_exact_dx = ball_dx;  // take full ball_dx as the ball neither crosses 
+
+	}
+
+
+	ball_x += ball_exact_dx;  // include new ball_dx 
+
+}
+
+
+
+
+
+
+
+///////////////////////////////////////////// BALL MOVEMENT TO DOWN ////////////////////////////////////////////////
+
+
+void ball_movement_down()
+{
+
+
+	if (ball_hit_the_boat && ball_radius - ball_y <= eps) // used ball_hit_the_boat condition to avoid ball_dx = 0 when starting the game && then checked  if the ball is right under the boat
+	{
+		angle = boat_bottom_right_x - ball_x - 15.5; // update angle for ball's new direction
+		ball_dx = velocity*cos(PI*angle / 180); // new ball_dx for new angle
+		ball_dy = ball_main_dy; // ball_dy will get its original change of speed as every collison of boat and ball is likely a new start
+		ball_y += ball_dy; // updates the ball_y for for updated ball_dy
+		ball_hit_the_boat = 0;
+		return;
+	}
+
+
+	ball_hit_the_boat = 0; // the ball isn't right under the boat
+	double destination_Y_axis = ball_y - ball_radius + ball_dy; // checks the final destination covered in Y axis if ball_dx is fully calculated
+
+	double ball_exact_dy_down; // aprropiate amouont of ball_dy 
+
+	if (destination_Y_axis - bottom_par < eps) //checking if the ball crosses bottom_par or not 
+	{
+		/*ball crosses bottom_par*/
+
+		ball_exact_dy_down = ball_y - ball_radius - bottom_par;
+		ball_exact_dy_down *= (-1); // ball is coming down so appropiate of ball_dy will be negative
+		ball_exact_dy = ball_exact_dy_down; // saving this for left and right movement of ball
+		bottom_par_or_boat_touched = true; // touches bottom
+		ball_dy = abs(ball_dy); // ball will change its direction in Y axis
+	}
+
+	else ball_exact_dy_down = ball_dy; // takes full ball_dy as the ball doesn't cross bottom_par
+
+	ball_y += ball_exact_dy_down; // updaiting the value of ball_y with appropiate ball_dy
+
+
+}
+
+
+////////////////////////////////////////////// BALL MOVEMENT TO UP //////////////////////////////////////////////////////////////////////
+
+void ball_movement_up()
+{
+
+	double destination_Y_axis = ball_y + ball_radius + ball_dy; // checks the final destination covered in Y axis if ball_dy is fully calculated 
+	double ball_exact_dy_up;
+
+	if (destination_Y_axis - boat_bottom_y >= eps) // comparing boat_bottom_y and final destination of ball_y if ball_dy is fully taken
+	{
+		bool check = game_over(); // checks if the game is over or not in respect to boat's and ball's position in the X axis
+
+		if (check == 0) // finds that the boat can't redirect the ball 
+		{
+			new_start(); // new round starts
+			return;
+		}
+
+		ball_hit_the_boat = 1; // the ball hit the bottom surface of the boat
+		bottom_par_or_boat_touched = 1; // as teh ball touched the boat, ball_dy might change its original speed, and then ball_dx will also change to maintain the same slope. So this is actually needed for ball's movement in X axis
+
+
+		ball_exact_dy_up = boat_bottom_y - ball_y - ball_radius; // appopita ball_dy 
+		ball_exact_dy = ball_exact_dy_up; // ball_dx might change , so appromiate ball_dy(ball_exact_dy) is saved
+		ball_dy = -ball_dy; // after hitting the boat, ball will change its direction in Y axis. so ball_dy becomes same with opposite sign
+
+
+	}
+
+	else ball_exact_dy_up = ball_dy; // no contact between ball and boat. so appropiate  ball_dy  = ball_dy
+
+	ball_y += ball_exact_dy_up; //updating ball_y for drawing the ball
+
+}
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////// GAME OVER //////////////////////////////////////////////////////////////////////////////
+
+bool game_over()
+{
+	if (ball_x >= boat_bottom_left_x && ball_x <= boat_bottom_right_x)return true;
+	return false;
+}
+
+
+
+
+
+//////////////////////////////////////////////////////////////////// NEW START //////////////////////////////////////////////////////////////////////////////
+
+void new_start()
+{
+
+
+	boat_image_movement_x = boat_image_x;
+	boat_image_movement_y = boat_image_y;
+
+
+	boat_bottom_left_x = boat_bottom_left_main_x;
+	boat_bottom_right_x = boat_bottom_right_main_x;
+	boat_bottom_y = boat_bottom_main_y;
+
+
+
+	boat_bottom_length = boat_bottom_right_x - boat_bottom_left_x;
+
+	ball_x = (boat_bottom_length / 2) + boat_bottom_left_x;
+	ball_y = boat_bottom_y - ball_radius;
+
+	velocity = main_velocity;
+	angle = main_angle;
+	ball_dx = ball_main_dx;
+	ball_dy = ball_main_dy;
+
+	direction_change_on_colusion = 0;
+	ball_movement_on = false;
+
+}
