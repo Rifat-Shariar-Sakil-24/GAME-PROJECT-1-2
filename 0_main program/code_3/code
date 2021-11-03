@@ -1,0 +1,1079 @@
+
+#include<iostream>
+#include<vector>
+using namespace std;
+#include "iGraphics.h"
+
+#define screenwidth 1200
+#define screenheight 780
+#define function_speed 20
+#define total_brick 60
+#define left_par 0
+#define right_par 0
+#define bottom_par 0
+#define brick_shuru_y 80
+#define brick_width  100
+#define brick_height  30
+#define brick_col 5
+#define brick_row 12
+#define eps 0.0001
+#define PI acos(-1)
+
+struct brick_sructure
+{
+	double brick_x;
+	double brick_y;
+
+
+	double line_top_left[2];
+	double line_top_right[2];
+	double line_bottom_right[2];
+	double line_bottom_left[2];
+
+	bool brick_show = true;
+
+};
+
+brick_sructure brick[total_brick];
+
+
+
+int brick_r = 82;
+int brick_g = 82;
+int brick_b = 82;
+
+
+
+int line_r = 0;
+int line_g = 0;
+int line_b = 0;
+
+
+
+double ang_dx, ang_dy;
+
+
+char bg[1][20] = { "image\\bgupdate.bmp" };
+char boat[1][20] = { "image\\boatfinal.bmp" };
+
+
+
+/*boat*/
+double boat_image_x = 480;
+double boat_image_y = 565;
+double boat_image_movement_x = boat_image_x;
+double boat_image_movement_y = boat_image_y;
+double boat_bottom_left_main_x = 499;
+double boat_bottom_right_main_x = 710;
+double boat_bottom_main_y = 625;
+double boat_bottom_left_x = boat_bottom_left_main_x;
+double boat_bottom_right_x = boat_bottom_right_main_x;
+double boat_bottom_y = boat_bottom_main_y;
+double boat_bottom_length = boat_bottom_right_x - boat_bottom_left_x; // = 211;
+double boat_keyboard_dx = 20;
+
+
+
+
+/*ball*/
+double ball_radius = 30;
+double ball_x = boat_bottom_left_x + (boat_bottom_length / 2);
+double ball_y = boat_bottom_y - ball_radius;
+double ball_main_dx = -7;
+double ball_main_dy = -13;
+double main_velocity = 10;
+double main_angle = 30;
+double  velocity = main_velocity;
+double angle = main_angle;
+double ball_dx = ball_main_dx;
+double ball_dy = ball_main_dy;
+bool ball_movement_on = false;
+bool direction_change_on_colusion = false;
+
+
+
+/*Music*/
+bool musicon = false;
+
+
+/*variables for exact movement for the ball in each direction*/
+bool ball_hit_the_boat = 0;
+bool bottom_par_or_boat_touched = 0;
+double ball_exact_dy;
+
+
+
+/*added functions*/
+void background_image_set();
+void boat_image_set();
+void drawing_brick_rectangle();
+void drawing_brick_lines();
+void drawing_ball();
+void right_key_movement();
+void left_key_movement();
+void brick_coordination_set();
+void ball_movement_change();
+void ball_movement_left_under_boat();
+void ball_movement_right_under_boat();
+void new_start();
+void ball_touched_boat();
+void ball_right_under_boat();
+void collision_free_ball_movement_pos_x_axis();
+void collision_free_ball_movement_neg_x_axis();
+
+
+
+
+int brick_collision();
+bool game_over();
+bool check_right_par_cross();
+bool check_left_par_cross();
+bool angular_collision_detection(double xx, double yy, double nn, int sp, int sn, int cc);
+bool upper_and_lower_surface_collision_detection(int ii);
+bool left_and_right_surface_collision_detection(int ii);
+
+
+
+
+
+void iDraw()
+{
+
+	iClear();
+
+	background_image_set();
+	boat_image_set();
+	drawing_ball();
+	drawing_brick_rectangle();
+	drawing_brick_lines();
+
+}
+
+
+void iMouseMove(int mx, int my){}
+void iPassiveMouseMove(int mx, int my){}
+void iMouse(int button, int state, int mx, int my){}
+
+
+
+void iKeyboard(unsigned char key)
+{
+	if (key == ' ')
+	{
+		if (ball_movement_on == false)ball_movement_on = true;
+		else ball_movement_on = false;
+	}
+	if (key == 'w')
+	{
+		musicon = true;
+		PlaySound("music\\ocean.wav", NULL, SND_LOOP | SND_ASYNC);
+	}
+}
+
+
+
+
+void iSpecialKeyboard(unsigned char key)
+{
+
+	if (key == GLUT_KEY_RIGHT) right_key_movement();
+	if (key == GLUT_KEY_LEFT)  left_key_movement();
+
+}
+
+
+
+
+
+int main()
+{
+	if (musicon)
+		PlaySound("music\\ocean.wav", NULL, SND_LOOP | SND_ASYNC);
+	iSetTimer(function_speed, ball_movement_change);
+	iInitialize(screenwidth, screenheight, "IN YOUR SERVICE");
+	brick_coordination_set();
+	iStart();
+	return 0;
+}
+
+
+
+
+void background_image_set()
+{
+	iShowBMP(0, 0, bg[0]);
+}
+
+
+
+
+void boat_image_set()
+{
+
+	iShowBMP2(boat_image_movement_x, boat_image_movement_y, boat[0], 255);
+
+}
+
+
+
+
+void drawing_ball()
+{
+	iSetColor(0, 0, 0);
+	iFilledCircle(ball_x, ball_y, ball_radius, 1000);
+}
+
+
+
+
+
+void drawing_brick_rectangle()
+{
+
+	for (int i = 0; i < total_brick; i++)
+	{
+		if (brick[i].brick_show)
+		{
+			iSetColor(brick_r, brick_g, brick_b);
+			iFilledRectangle(brick[i].brick_x, brick[i].brick_y, brick_width, brick_height);
+			//iShowBMP(brick[i].brick_x, brick[i].brick_y, "image\\brick.bmp");
+		}
+	}
+
+}
+
+
+
+
+
+
+void drawing_brick_lines()
+{
+
+	for (int i = 0; i < total_brick; i++)
+	{
+		if (brick[i].brick_show)
+		{
+
+			iSetColor(line_r, line_g, line_b);
+
+			iLine(brick[i].line_top_left[0], brick[i].line_top_left[1], brick[i].line_top_right[0], brick[i].line_top_right[1]);
+			iLine(brick[i].line_top_left[0], brick[i].line_top_left[1], brick[i].line_bottom_left[0], brick[i].line_bottom_left[1]);
+			iLine(brick[i].line_bottom_left[0], brick[i].line_bottom_left[1], brick[i].line_bottom_right[0], brick[i].line_bottom_right[1]);
+			iLine(brick[i].line_bottom_right[0], brick[i].line_bottom_right[1], brick[i].line_top_right[0], brick[i].line_top_right[1]);
+		}
+	}
+}
+
+
+
+
+
+
+
+void right_key_movement()
+{
+
+	double total = boat_bottom_right_x + boat_keyboard_dx; // right movement of boat in X axis for movement key(right arrow)
+
+	double ball_move; // for every click on right movement key of boat, the ball will also move if the ball movement is off. ball_move indicates how much the ball will move in X axis for every movement key click 
+
+	if (total - (screenwidth - right_par) <= eps) // boat can move freely with the defined  movement value for right movement key
+	{
+		boat_image_movement_x += boat_keyboard_dx; // boat main moves 
+		boat_bottom_left_x += boat_keyboard_dx;    // the bottom left corner of the boat moves
+		boat_bottom_right_x += boat_keyboard_dx;   // he bottom right corner of the boat moves
+		ball_move = boat_keyboard_dx;
+
+	}
+
+	else     //at some positions of the boat in X axis, it won't move that much what it was supposed to.
+	{
+
+		double exact_boat_movement_X_axis = screenwidth - right_par - 3 - total + boat_keyboard_dx; // appropiate amount of movement in X axis for right movement key
+
+		boat_image_movement_x += exact_boat_movement_X_axis;  // boat image moves some certain amount such that its right side doesn't cross right_par
+		boat_bottom_left_x += exact_boat_movement_X_axis;     // boat bottom left corner will also move along with its holding picture
+		boat_bottom_right_x += exact_boat_movement_X_axis;    // boat bottom left corner will also move along with its holding picture
+		ball_move = exact_boat_movement_X_axis;
+	}
+
+	if (ball_movement_on == false) ball_x += ball_move; // if ball movement is off , ball will also move if the boat moves. Amount of movement will be the same of boat movement
+
+
+}
+
+
+
+
+void left_key_movement()
+{
+	double total = boat_bottom_left_x - boat_keyboard_dx; // left movement of boat in X axis for left movement key(left arrow)
+
+	double ball_move;  // for every click on left movement key, the ball will also move if the ball movement is off. ball_move indicates how much the ball will move in X axis for every left movement key click 
+
+	if (total >= left_par + 5)  // boat can move freely with the defined movement value for left movement key
+	{
+		boat_image_movement_x -= boat_keyboard_dx;  // boat image moves 
+		boat_bottom_left_x -= boat_keyboard_dx;     // the bottom left corner of the boat moves
+		boat_bottom_right_x -= boat_keyboard_dx;    // the bottom right corner of the boat moves
+		ball_move = boat_keyboard_dx;
+
+	}
+
+	else    //at some positions of the boat in X axis, it won't move that much what it was supposed to.
+	{
+
+		double exact_boat_movement_X_axis = boat_bottom_left_x - left_par - 5;
+
+		boat_image_movement_x -= exact_boat_movement_X_axis;   // boat image moves some certain amount such that its left side doesn't cross left_par
+		boat_bottom_left_x -= exact_boat_movement_X_axis;      //  boat bottom left corner will also move along with its holding picture
+		boat_bottom_right_x -= exact_boat_movement_X_axis;     //  boat bottom right corner will also move along with its holding picture
+		ball_move = exact_boat_movement_X_axis;
+	}
+
+	if (ball_movement_on == false) ball_x -= ball_move;  // if ball movement is off , ball will also move if the boat moves. Amount of movement will be the same of boat movement
+
+}
+
+
+
+
+
+
+
+void brick_coordination_set()
+{
+
+	/*first brick's coordination*/
+	double starting_x = left_par;
+	double starting_y = brick_shuru_y;
+
+	int brick_number = 0;
+
+	for (int i = 0; i < brick_col; i++)
+	{
+		for (int j = 0; j < brick_row; j++)
+		{
+
+			brick[brick_number].brick_x = starting_x;
+			brick[brick_number].brick_y = starting_y;
+
+
+
+			brick[brick_number].line_bottom_left[0] = starting_x;
+			brick[brick_number].line_bottom_left[1] = starting_y;
+
+			brick[brick_number].line_top_left[0] = starting_x;
+			brick[brick_number].line_top_left[1] = starting_y + brick_height;
+
+
+
+			starting_x += brick_width;
+
+
+			brick[brick_number].line_bottom_right[0] = starting_x;
+			brick[brick_number].line_bottom_right[1] = starting_y;
+
+
+			brick[brick_number].line_top_right[0] = starting_x;
+			brick[brick_number].line_top_right[1] = starting_y + brick_height;
+
+
+
+			brick_number++;
+		}
+
+		starting_x = left_par;
+		starting_y += brick_height;
+	}
+
+}
+
+
+
+
+
+
+
+void ball_movement_change()
+{
+
+	if (ball_movement_on)
+	{
+		int number;
+
+		if (ball_y + ball_dy + ball_radius >= boat_bottom_y)
+		{
+
+			double new_ball_dy = boat_bottom_y - ball_y - ball_radius;
+			double new_ball_dx = (ball_dx*new_ball_dy) / ball_dy;
+
+			bool check = 0;
+
+			if (ball_dx > 0)check = check_right_par_cross();
+			else check = check_left_par_cross();
+
+
+			if (!check) ball_touched_boat();
+
+		}
+
+
+		else if (boat_bottom_y - ball_radius - ball_y <= eps)ball_right_under_boat();
+
+
+		else   if ((number = brick_collision()) == 0)
+		{
+
+			if (ball_dx > 0) collision_free_ball_movement_pos_x_axis();
+			else collision_free_ball_movement_neg_x_axis();
+		}
+
+		else  brick[number - 1].brick_show = 0;
+
+
+	}
+
+}
+
+
+
+
+
+
+
+bool check_right_par_cross()
+{
+	double new_ball_dy = boat_bottom_y - ball_y - ball_radius;
+	double new_ball_dx = (ball_dx*new_ball_dy) / ball_dy;
+
+
+	if (ball_x + ball_radius + new_ball_dx > (screenwidth - right_par + 1))
+	{
+		new_ball_dx = screenwidth - right_par + 1 - ball_x - ball_radius;
+		new_ball_dy = (ball_dy*new_ball_dx) / ball_dx;
+		ball_dx *= (-1);
+		return 1;
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+bool check_left_par_cross()
+{
+	double new_ball_dy = boat_bottom_y - ball_y - ball_radius;
+	double new_ball_dx = (ball_dx*new_ball_dy) / ball_dy;
+
+	if (ball_x - ball_radius + new_ball_dx < (left_par - 1))
+	{
+		new_ball_dx = ball_x - ball_radius - left_par + 1;
+		new_ball_dy = (ball_dy*new_ball_dx) / ball_dx;
+		ball_dx *= (-1);
+		return 1;
+	}
+	return 0;
+}
+
+
+
+
+
+
+void ball_touched_boat()
+{
+
+	double new_ball_dy = boat_bottom_y - ball_y - ball_radius;
+	double new_ball_dx = (ball_dx*new_ball_dy) / ball_dy;
+
+
+	ball_y += new_ball_dy;
+	ball_x += new_ball_dx;
+
+	ball_dy *= (-1);
+
+	angle = boat_bottom_right_x - ball_x - 15.5;
+	ball_dx = velocity*cos(PI*angle / 180);
+}
+
+
+
+
+
+
+void ball_right_under_boat()
+{
+	if (!game_over()) new_start();
+	else
+	{
+		if (ball_dx > 0) ball_movement_right_under_boat();
+		else ball_movement_left_under_boat();
+
+	}
+}
+
+
+
+
+
+
+void collision_free_ball_movement_pos_x_axis()
+{
+	double ball_new_dx;
+	int right_cross = 0;
+	int y_shift = 0;
+
+	if (ball_x + ball_dx + ball_radius > (screenwidth - right_par + 1))
+	{
+		ball_new_dx = screenwidth - right_par + 1 - ball_x - ball_radius;
+		right_cross = 1;
+	}
+	else ball_new_dx = ball_dx;
+
+
+	double ball_new_dy;
+
+	if (ball_new_dx == 0) ball_new_dy = ball_dy;
+
+	else
+	{
+		ball_new_dy = (ball_new_dx*ball_dy) / ball_dx;
+	}
+
+	if (ball_y - ball_radius + ball_new_dy <= bottom_par)
+	{
+		ball_new_dy = ball_y - ball_radius - bottom_par;
+		ball_new_dx = (ball_dx*ball_new_dy) / ball_dy;
+		y_shift = 1;
+	}
+	else if (right_cross)ball_dx *= (-1);
+
+
+	ball_x += abs(ball_new_dx);
+	if (ball_dy < 0) ball_y -= abs(ball_new_dy);
+	else ball_y += abs(ball_new_dy);
+	if (y_shift) ball_dy *= (-1);
+}
+
+
+
+
+
+
+
+void collision_free_ball_movement_neg_x_axis()
+{
+
+	double ball_new_dx;
+	int left_cross = 0;
+
+	int y_shift = 0;
+	if (ball_x - ball_radius + ball_dx < left_par - 1)
+	{
+		ball_new_dx = ball_x - ball_radius - left_par + 1;
+		left_cross = 1;
+	}
+
+	else
+		ball_new_dx = ball_dx;
+
+	ball_new_dx = -(abs(ball_new_dx));
+
+	double ball_new_dy;
+	if (ball_new_dx == 0) ball_new_dy = ball_dy;
+	else
+	{
+		ball_new_dy = (ball_new_dx*ball_dy) / ball_dx;
+	}
+
+	if (ball_y - ball_radius + ball_new_dy <= bottom_par)
+	{
+		ball_new_dy = ball_y - ball_radius - bottom_par;
+		ball_new_dx = (ball_dx*ball_new_dy) / ball_dy;
+		y_shift = 1;
+
+	}
+	else if (left_cross) ball_dx *= (-1);
+
+	ball_x -= abs(ball_new_dx);
+	if (ball_dy < 0) ball_y -= abs(ball_new_dy);
+	else ball_y += abs(ball_new_dy);
+
+	if (y_shift) 	ball_dy *= (-1);
+
+}
+
+
+
+
+
+
+
+
+int brick_collision()
+{
+
+
+	for (int i = 0; i < total_brick; i++)
+	{
+		if (brick[i].brick_show)
+		{
+			if (ball_x >= brick[i].brick_x && ball_x <= brick[i].brick_x + brick_width)
+			{
+				if (upper_and_lower_surface_collision_detection(i))
+				{
+					return i + 1;
+				}
+
+			}
+			else if (ball_y >= brick[i].brick_y && ball_y <= brick[i].brick_y + brick_height)
+			{
+
+				if (left_and_right_surface_collision_detection(i))
+				{
+					return i + 1;
+
+				}
+
+			}
+
+		}
+
+	}
+
+
+
+	for (int i = 0; i < total_brick; i++)
+	{
+		if (brick[i].brick_show)
+		{
+
+			if (angular_collision_detection(brick[i].line_top_left[0], brick[i].line_top_left[1], i, 1, -1, 1)) {
+				return i + 1;
+			}
+
+			if (angular_collision_detection(brick[i].line_bottom_left[0], brick[i].line_bottom_left[1], i, 1, 1, 4)) {
+				return i + 1;
+			}
+
+
+			if (angular_collision_detection(brick[i].line_top_right[0], brick[i].line_top_right[1], i, -1, -1, 2)) {
+				return i + 1;
+			}
+
+			if (angular_collision_detection(brick[i].line_bottom_right[0], brick[i].line_bottom_right[1], i, -1, 1, 3)) {
+				return i + 1;
+			}
+
+		}
+	}
+
+	return 0;
+
+}
+
+
+
+
+
+
+
+
+
+bool  angular_collision_detection(double brick_x, double brick_y, double brick_number, int sign_dx, int sign_dy, int corner)
+{
+
+	double ball_new_center_x = ball_x + ball_dx;
+	double ball_new_center_y = ball_y + ball_dy;
+	double x = (ball_new_center_x - brick_x);
+	double y = (ball_new_center_y - brick_y);
+	double distance = sqrt(x*x + y*y);
+
+
+	if (distance - ball_radius <= eps)
+	{
+
+		double a = brick_x;
+		double b = brick_y;
+		double r = ball_radius;
+
+		double nx = ball_x + ball_dx;
+		double ny = ball_y + ball_dy;
+
+
+		double p = ball_dx / ball_dy;
+		double q = -(p*ny) + nx;
+		double d = a - q;
+
+
+		double A = (1 + (p*p));
+		double B = -((2 * b) + (2 * p*d));
+		double C = (b*b) + (d*d) - (r*r);
+
+
+		double y1 = (-B + sqrt((B*B) - (4 * A*C))) / (2 * A);
+		double y2 = (-B - sqrt((B*B) - (4 * A*C))) / (2 * A);
+
+		double Y;
+		double X;
+
+
+
+		switch (corner)
+		{
+
+		case 1:
+
+			Y = max(y1, y2);
+			X = (-p*Y) + q;
+			ang_dy = abs(ball_y - Y);
+			ang_dx = (ball_dx*ang_dy) / ball_dy;
+			ang_dx = abs(ang_dx);
+
+
+
+			if (ball_dx >= 0 && ball_dy < 0)
+			{
+				ball_x += ang_dx;
+				ball_y -= ang_dy;
+
+				ball_dx *= (-1);
+				ball_dy *= (-1);
+			}
+			else if (ball_dx<0)
+			{
+				ball_x -= ang_dx;
+				ball_y -= ang_dy;
+				ball_dy *= (-1);
+			}
+			else
+			{
+
+
+				ball_x += ang_dx;
+				ball_y += ang_dy;
+				ball_dx *= (-1);
+			}
+
+			break;
+
+		case 2:
+
+			Y = max(y1, y2);
+			X = (-p*Y) + q;
+			ang_dy = abs(ball_y - Y);
+			ang_dx = (ball_dx*ang_dy) / ball_dy;
+			ang_dx = abs(ang_dx);
+
+			if (ball_dx <= 0 && ball_dy < 0)
+			{
+				ball_x -= ang_dx;
+				ball_y -= ang_dy;
+
+				ball_dx *= (-1);
+				ball_dy *= (-1);
+			}
+			else if (ball_dx>0)
+			{
+				ball_x += ang_dx;
+				ball_y -= ang_dy;
+				ball_dy *= (-1);
+			}
+			else
+			{
+
+				ball_x -= ang_dx;
+				ball_y += ang_dy;
+				ball_dx *= (-1);
+			}
+
+			break;
+
+
+
+		case 3:
+			Y = min(y1, y2);
+			X = (-p*Y) + q;
+			ang_dy = abs(ball_y - Y);
+			ang_dx = (ball_dx*ang_dy) / ball_dy;
+			ang_dx = abs(ang_dx);
+
+			if (ball_dx <= 0 && ball_dy > 0)
+			{
+
+				ball_x -= ang_dx;
+				ball_y += ang_dy;
+
+				ball_dx *= (-1);
+				ball_dy *= (-1);
+			}
+			else if (ball_dx>0)
+			{
+				ball_x += ang_dx;
+				ball_y += ang_dy;
+				ball_dy *= (-1);
+			}
+			else
+			{
+
+				ball_x -= ang_dx;
+				ball_y -= ang_dy;
+				ball_dx *= (-1);
+			}
+
+			break;
+
+
+		case 4:
+			Y = min(y1, y2);
+			X = (-p*Y) + q;
+			ang_dy = abs(ball_y - Y);
+			ang_dx = (ball_dx*ang_dy) / ball_dy;
+			ang_dx = abs(ang_dx);
+
+
+
+			if (ball_dx >= 0 && ball_dy > 0)
+			{
+				ball_x += ang_dx;
+				ball_y += ang_dy;
+
+				ball_dx *= (-1);
+				ball_dy *= (-1);
+			}
+
+			else if (ball_dx<0)
+			{
+				ball_x -= ang_dx;
+				ball_y += ang_dy;
+				ball_dy *= (-1);
+			}
+			else
+			{
+
+
+				ball_x += ang_dx;
+				ball_y -= ang_dy;
+				ball_dx *= (-1);
+			}
+
+			break;
+
+		}
+
+
+		return 1;
+
+	}
+
+	return 0;
+}
+
+
+
+
+
+
+
+
+bool upper_and_lower_surface_collision_detection(int brick_number)
+{
+
+	bool brick_vanish = 0;
+
+	if (ball_dy < 0)
+	{
+		if (ball_y - ball_radius + ball_dy - brick[brick_number].brick_y >= eps && ball_y - ball_radius + ball_dy - brick[brick_number].brick_y - brick_height <= eps)
+			brick_vanish = 1;
+	}
+
+	else if (ball_dy>0)
+	{
+
+		if ((brick[brick_number].brick_y + brick_height) - (ball_y + ball_radius + ball_dy) >= eps && ball_y + ball_radius + ball_dy - brick[brick_number].brick_y >= eps)
+			brick_vanish = 1;
+	}
+
+
+	if (brick_vanish)
+	{
+
+		double new_ball_dy;
+
+		if (ball_dy < 0){ new_ball_dy = -(ball_y - ball_radius - brick[brick_number].brick_y - brick_height); }
+		else{ new_ball_dy = abs(ball_y + ball_radius - brick[brick_number].brick_y); }
+
+		double new_ball_dx = (ball_dx*new_ball_dy) / ball_dy;
+
+		if (ball_dx<0) 	ball_x -= abs(new_ball_dx);
+		else ball_x += abs(new_ball_dx);
+
+		if (ball_dy<0) ball_y -= abs(new_ball_dy);
+		else ball_y += abs(new_ball_dy);
+
+		ball_dy *= (-1);
+		return 1;
+
+	}
+
+	return 0;
+}
+
+
+
+
+
+
+
+
+bool left_and_right_surface_collision_detection(int brick_number)
+{
+
+	bool brick_vanish = 0;
+
+	if (ball_dx < 0)
+	{
+		if (ball_x - ball_radius + ball_dx - brick[brick_number].brick_x >= eps && ball_x - ball_radius + ball_dx - brick[brick_number].brick_x - brick_width <= eps)
+			brick_vanish = 1;
+	}
+
+	else if (ball_dx>0)
+	{
+
+		if ((brick[brick_number].brick_x + brick_width) - (ball_x + ball_radius + ball_dx) >= eps && ball_x + ball_radius + ball_dx - brick[brick_number].brick_x >= eps)
+			brick_vanish = 1;
+	}
+
+	if (brick_vanish)
+	{
+
+		double new_ball_dx;
+
+		if (ball_dx < 0){ new_ball_dx = -(ball_x - ball_radius - brick[brick_number].brick_x - brick_width); }
+		else{ new_ball_dx = abs(ball_x + ball_radius - brick[brick_number].brick_x); }
+
+		double new_ball_dy = (ball_dy*new_ball_dx) / ball_dx;
+
+		if (ball_dx < 0) 	ball_x -= abs(new_ball_dx);
+		else ball_x += abs(new_ball_dx);
+
+		if (ball_dy < 0) ball_y -= abs(new_ball_dy);
+		else ball_y += abs(new_ball_dy);
+
+		ball_dx *= (-1);
+		return 1;
+
+	}
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+void ball_movement_left_under_boat()
+{
+	double ball_new_dx;
+
+	if (ball_x - ball_radius + ball_dx < left_par - 1)
+	{
+		ball_new_dx = ball_x - ball_radius - left_par + 1;
+		ball_dx *= (-1);
+	}
+
+	else
+		ball_new_dx = ball_dx;
+
+
+	double ball_new_dy;
+	if (ball_new_dx == 0) ball_new_dy = 0;
+	else
+	{
+		ball_new_dy = (ball_new_dx*ball_dy) / ball_dx;
+	}
+	ball_x -= abs(ball_new_dx);
+	ball_y -= abs(ball_new_dy);
+
+}
+
+
+
+void ball_movement_right_under_boat()
+{
+	double ball_new_dx;
+
+	if (ball_x + ball_dx + ball_radius > (screenwidth - right_par + 1))
+	{
+		ball_new_dx = screenwidth - right_par + 1 - ball_x - ball_radius;
+		ball_dx *= (-1);
+	}
+	else ball_new_dx = ball_dx;
+
+
+	double ball_new_dy;
+	if (ball_new_dx == 0) ball_new_dy = 0;
+	else
+	{
+		ball_new_dy = (ball_new_dx*ball_dy) / ball_dx;
+	}
+	ball_x += abs(ball_new_dx);
+	ball_y -= abs(ball_new_dy);
+}
+
+
+
+
+
+
+
+
+bool game_over()
+{
+	if (ball_x >= boat_bottom_left_x && ball_x <= boat_bottom_right_x)return true;
+	return false;
+}
+
+
+
+
+
+
+void new_start()
+{
+
+
+	boat_image_movement_x = boat_image_x;
+	boat_image_movement_y = boat_image_y;
+
+
+	boat_bottom_left_x = boat_bottom_left_main_x;
+	boat_bottom_right_x = boat_bottom_right_main_x;
+	boat_bottom_y = boat_bottom_main_y;
+
+
+
+	boat_bottom_length = boat_bottom_right_x - boat_bottom_left_x;
+
+	ball_x = (boat_bottom_length / 2) + boat_bottom_left_x;
+	ball_y = boat_bottom_y - ball_radius;
+
+	velocity = main_velocity;
+	angle = main_angle;
+	ball_dx = ball_main_dx;
+	ball_dy = ball_main_dy;
+
+	direction_change_on_colusion = 0;
+	ball_movement_on = false;
+
+}
+
