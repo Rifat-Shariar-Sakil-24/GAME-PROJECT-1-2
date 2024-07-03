@@ -50,7 +50,7 @@ Once you have cloned the repository, you need to set it up locally in IntelliJ I
 
 To run the game, follow these steps:
 
-1. Open 0_main_program and run code file
+1. Open `game` and then `code.cpp`  run code file
 
 
 ## Some Game Play Shots
